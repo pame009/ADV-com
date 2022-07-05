@@ -1,305 +1,178 @@
-// Fig. 12.3: fig12_03.c
-// Inserting and deleting nodes in a list
-#include <iostream>
-#include <iomanip>
+#include<iostream>
+#include<stdlib.h>
+#include<string.h>
 
-using namespace std;
-//3
+using namespace  std;
 
-// self-referential structure    
-class Node
-{ 
-private:
-    int value;
-    Node *nextPtr,*pPtr ;
+class NODE{
+	 char data;
+	NODE *nextPtr;
 public:
-  Node(int x=0);
- ~Node();
-  Node* get_next();
-  Node* get_prev();
-  void set_next(Node* t);
-  void set_prev(Node* t);
-  void print();
-  int  get_data(){return value;}
+	NODE(char);
+	~NODE();
+  char get_value();
+	void set_next(NODE *);
+	NODE* get_next();
 };
-            
-typedef Node *NodePtr; // synonym for Node*
+typedef NODE* NodePtr;
 
+NODE::NODE(char x){
+	data=x;
+	nextPtr=NULL;
 
-Node::Node(int x){
-  value=x;
-  nextPtr=NULL;
-  pPtr=NULL;
+}
+char NODE::get_value(){
+	return data;
+
 }
 
-Node::~Node(){
-		cout<<value<<" deleted"<<endl;
+NODE* NODE::get_next(){
+	return nextPtr;
+
 }
 
-NodePtr Node::get_next(){
-    return nextPtr;
+void NODE::set_next(NODE *t){
+	 nextPtr=t;
+
 }
 
-NodePtr Node::get_prev(){
-    return pPtr;
-}
+NODE::~NODE(){
+	 cout<<"deleting " <<data<<endl;
 
-void Node::set_next(NodePtr t){
-    nextPtr=t; 
-}
-
-void Node::set_prev(NodePtr t){
-    pPtr=t; 
-}
-
-void Node::print(){ 
-    cout<<setw(3)<<value; 
 }
 
 
-class LL{
-   NodePtr hol; //head of linked list
-   int size;
-  public:
-     LL();
-     
-	  int deletes( int value );
-    int isEmpty( );
-    void insert(int value );
-    void printList( );
-    void printListR( );
-     ~LL();
+
+
+class Stack{
+private:
+	 NodePtr top;
+	int size;
+public:
+    Stack(NodePtr = NULL);
+    ~Stack();
+    int pop();
+    void push(int);
+    bool isEmpty(bool empty);
 };
 
-LL::LL(){
-  hol=NULL;
-  size=0;
+Stack::Stack(NodePtr t){
+  if(t) {
+    top=t;
+    size=1;
+  }
+ else{
+   top=NULL;
+	 size=0;
+   }
+}
+void Stack::push(int x){
+  NodePtr new_node=new NODE(x);
+  if(new_node){
+	 	  new_node->set_next(top);
+      top=new_node;
+     size++;
+   }
+ else cout<<"No memory left for new nodes"<<endl;
+		 // Left missing for exercises…
+}
+int Stack::pop(){
+ 	   NodePtr t=top;
+		char value;		
+	 if(t)	{
+    top=top->get_next();
+     value=t->get_value();
+	// Left missing for exercises
+     delete t;
+     size--;
+     return value;
+     }
+		cout<<"Empty stack"<<endl<<endl;
+   return 0;
+	}
+
+bool Stack::isEmpty(bool empty = false){
+  bool Empty = empty;
+  if(size == 0){
+    return true;
+  }
+  else return false;
 }
 
-
-LL::~LL(){
-  cout<<"deleting all nodes"<<endl;
-  NodePtr t;
-  t=hol;
-  int i;
- for(i=0;i<size;i++){
-      hol=hol->get_next();
+Stack::~Stack(){
+   cout<<"Clearing all stacks"<<endl;
+  	int i;
+  NodePtr t=top;
+  for(i=0;i<size;i++){
+      t=top;
+      top=top->get_next();
       delete t;
-      t=hol;
-  } 
-  
+           	// Left missing for exercises
+  }
+
+
 }
 
 
-// insert a new value into the list in sorted order
-void LL::insert( int value )
-{ 
-   NodePtr newPtr; // pointer to new node
-   NodePtr previousPtr; // pointer to previous node in list
-   NodePtr currentPtr; // pointer to current node in list
 
-   newPtr =new Node(value); // create node & put value in
+/*
+./main {[]}[] {[]] {{
 
-   if ( newPtr != NULL ) { // is space available
-     
-      previousPtr = NULL;
-      currentPtr = hol;
-      // loop to find the correct location in the list       
-      while ( currentPtr != NULL && value > currentPtr->get_data() ) {
-         previousPtr = currentPtr; // walk to ...               
-         currentPtr = currentPtr->get_next(); // ... next node 
-      } // end while                                         
+There are 3 main cases
 
-      // insert new node at beginning of list
-      if ( previousPtr == NULL ) { 
-         newPtr->set_next(hol);
-         hol = newPtr;
-        if(currentPtr) //first node insert
-          currentPtr->set_prev(newPtr);
-      } // end if
-      else { // insert new node between previousPtr and currentPtr
-         previousPtr->set_next(newPtr);
-         newPtr->set_next(currentPtr);
+1. check if the parenthesis match —> pop the same type?
 
-        if(currentPtr) //insert last node
-          currentPtr->set_prev(newPtr);
-        newPtr->set_prev(previousPtr);
-      } // end else
-     ++size;
-   } // end if
-   else {
-      cout<<value <<" not inserted. No memory available."<<endl;
-   } // end else
-} // end function insert
+2. is the stack empty at the end (is there opening without closing)
 
+3. are you trying to pop an empty stack somewhere (close without opening)
 
-// delete a list element
-int LL::deletes(  int value )
-{ 
-   NodePtr previousPtr; // pointer to previous node in list
-   NodePtr currentPtr; // pointer to current node in list
-   NodePtr tempPtr; // temporary node pointer
+*/
+using namespace  std;
+int main(int argc, char **argv){
+  printf("Checking the parentheses in argv arguments\n\n");
+  int i,N,j;
+  Stack s;
+  char t;
+  int match;
+  for(i=1;i<argc;i++){
+   match=1;
+     for(j=0;j<strlen(argv[i]);j++){
+       /* Use stack to help with the parentheses*/
+       switch(argv[i][j]){
+          case '[': // no need 
+          case '{': s.push(argv[i][j]); break;
 
-   // delete first node
-   if ( value == hol->get_data() ) { 
-      tempPtr = hol; // hold onto node being removed
-      hol = hol->get_next(); // de-thread the node
-      size--;  
-      delete tempPtr; // free the de-threaded node
-
-     if(hol) hol->set_prev(NULL);
-      return value;
-   } // end if
-   else { 
-      previousPtr = hol;
-      currentPtr = hol->get_next();
-
-      // loop to find the correct location in the list
-      while ( currentPtr != NULL && currentPtr->get_data() != value ) { 
-         previousPtr = currentPtr; // walk to ...  
-         currentPtr = currentPtr->get_next(); // ... next node  
-      } // end while
-
-      // delete node at currentPtr
-      if ( currentPtr != NULL ) { 
-         tempPtr = currentPtr;
-         previousPtr->set_next(currentPtr->get_next());
-        currentPtr=currentPtr->get_next();
-        if(currentPtr) currentPtr->set_prev(previousPtr); 
-         delete tempPtr ;
-         size--;
-         return value;
-      } // end if
-   } // end else
-
-   return '\0';
-} // end function delete
-
-// return 1 if the list is empty, 0 otherwise
-int LL::isEmpty(  )
-{ 
-   return hol == NULL;
-} // end function isEmpty
-
-
-// print the list
-void LL::printList( )
-{ 
-  NodePtr currentPtr=hol;
-   // if list is empty
-   if ( size==0) {
-      cout<< "List is empty."<<endl;
-   } // end if
-   else { 
-       cout<< "The list is:" <<endl;
-
-      // while not the end of the list
-      //while ( currentPtr != NULL ) { 
-     int i;
-     for(i=0;i<size;i++){
-          currentPtr->print() ;
-            cout<<"  ->";
-         currentPtr = currentPtr->get_next();   
-      } // end while
-
-      puts( "NULL\n" );
-   } // end else
-} // end function printList
-
-
-void LL::printListR( )
-{
- // if list is empty
- if ( isEmpty() ) {
-cout<<"List is empty"<<endl;
-// end if
-} 
-  else{
-    int i;
-    NodePtr currentPtr=hol;
-    
-    for(i=0;i<size-1;i++){ //1. find last node
-      currentPtr=currentPtr->get_next();
+          case ']': t= s.pop();  //t ='['
+            if(t!='[') match=0;  break;
+        
+              //compare
+          case '}': t= s.pop(); 
+            if(t!='{') match=0;  break;
+              //compare
+       }
+              
+       if(match==0) break;
+     }    
+   
+    if(match==0){
+    cout<<"The parentheses do not match\n\n";
     }
     
-    for(i=0;i<size;i++){ //2. from last node print each node
-      currentPtr->print();
-      cout<<"  ->";
-      currentPtr=currentPtr->get_prev(); 
-      //3. move to prev node
+    else if (!s.isEmpty()){ //check stack is empty
+    cout<<"\nNo close brackets\n";      
       }
-
-     }// end else
-      puts( "NULL\n" );
-} // end function printList
-
-
-
-void instructions( void );
-
-int main( void )
-{ 
-   LL l; // initially there are no nodes
-   unsigned int choice; // user's choice
-   int item; // char entered by user
-
-   instructions(); // display the menu
-   cout<< "? " ;
-   cin>> choice ;
-
-   // loop while user does not choose 3
-   while ( choice != 3 ) { 
-
-      switch ( choice ) { 
-         case 1:
-            cout<<"Enter a number: " ;
-            cin>> item ;
-            l.insert( item ); // insert item in list
-            l.printList();//print the list out
-            l.printListR();//print the list out
-            break;
-         case 2: // delete an element
-            // if list is not empty
-            if ( !l.isEmpty(  ) ) { 
-               cout<< "Enter number to be deleted: " ;
-               cin>>item ;
-
-               // if character is found, remove it
-               if ( item==l.deletes( item ) ) { // remove item
-                // cout<<item << " deleted.\n";
-                  l.printList( );
-                  l.printListR( );
-               } // end if
-               else {
-                  cout<<item<<" not found.\n\n";
-               } // end else
-            } // end if
-            else {
-               cout<<"List is empty."<<endl;
-            } // end else
-
-            break;
-         default: 
-           cout<< "Invalid choice." <<endl;
-            instructions();
-            break;
-      } // end switch
-
-      cout<< "? " ;
-     cin>>choice ;
-   } // end while
-
-   puts( "End of run." );
-} // end main
+   /*   
+else if (s.pop()){ //pop empty bracket
+    cout<<"-------\n";
+      }
+     */   
+    
+      else{
+        cout<<"The parentheses match\n\n";
+        }
+  }
 
 
 
-
-// display program instructions to user
-void instructions( void )
-{ 
-   cout<< "Enter your choice:\n"
-      "   1 to insert an element into the list.\n"
-      "   2 to delete an element from the list.\n"
-      "   3 to end."<<endl ;
-} // end function instructions
+   return 0;
+}
