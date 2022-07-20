@@ -1,170 +1,164 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-using namespace std;
 #include <iostream>
+#include <string.h>
+#include <iomanip>
+using namespace std;
 
-class NODE{
-	 int order,qty;
-	NODE *nextPtr;
+#ifndef treenode_h
+#define  treenode_h
+// An integer binary search tree
+
+class TreeNode{
+TreeNode *leftPtr;
+TreeNode *rightPtr;
+int data;
+
 public:
-	NODE(int,int);
-	~NODE();
-  int get_value();
-	void set_next(NODE *);
-	NODE* get_next();
-};
-typedef NODE* NodePtr;
-
-NODE::NODE(int x,int y){
-  order=x;
-  qty=y;
-	nextPtr=NULL;
+TreeNode(int x){
+  data=x;
+  leftPtr=NULL;
+  rightPtr=NULL;
 }
-
-int NODE::get_value(){
-	 int price;
-   cout<<"\nOrder "<<order<<" pay ";
-  switch(order){
-    case 1: 
-    cout<<"Ramen";
-    price=100*qty;
-    break;
-
-    case 2:
-    cout<<"Som Tum";
-    price=20*qty;
-    break;
-
-    case 3:
-    cout<<"Fried chicken";
-    price=50*qty;
-    break;
-
-    default: 
-    cout<<"No food available"<<endl;
-    price=0;
-    }
-  
-    cout<<" price "<<price<<" qty "<<qty<<endl;
-  return price;
+~TreeNode(){
+  cout<<"Deleting "<<data<<endl;
 }
+void set_left(TreeNode* t){leftPtr=t;}
+void set_right(TreeNode* t){rightPtr=t;}
+TreeNode* move_left(){return leftPtr;}
+TreeNode* move_right(){return rightPtr;}
+int get_value(){return data;}
+};// end structure treeNode 
 
-NODE* NODE::get_next(){
-	return nextPtr;
-
-}
-
-void NODE::set_next(NODE *t){
-	 nextPtr=t;
-
-}
-
-NODE::~NODE(){
-	 cout<<"\ndeleting order " <<order<<endl;
-
-}
+typedef TreeNode* TreeNodePtr; 
+// synonym for TreeNode*
+#endif
 
 
-/* MODIFY THIS*/
-class Queue {
-	NodePtr headPtr,tailPtr;
-	int size;
+
+class BST{
+int size;
+TreeNodePtr rootPtr; //create Treenode rootnode
+void inOrder(TreeNodePtr);
+void preOrder(TreeNodePtr);
+void postOrder(TreeNodePtr);
+void treeOrder(TreeNodePtr,int);
+void clear_node(TreeNodePtr);
+
 public:
-   void enqueue(int,int);
-   int dequeue();
-   Queue();
-   ~Queue(); // dequeue all
-};
 
-Queue::Queue(){
+BST(){
   size=0;
-  headPtr=NULL;
-  tailPtr=NULL;
+  rootPtr=NULL;
 }
 
-Queue::~Queue(){
-  /*basically dequeue all*/
-  int i;
-  cout<<"\nThere are "<<size<<" ppl left in the queue\n";
-  cout<<"dequeue all\n";
-  for(i=0;i<size;i++) dequeue();
-}
+~BST(){clear_node(rootPtr);}
 
-void Queue::enqueue(int x,int y){
-  NodePtr new_node= new NODE(x,y);
-if(new_node){ 
-    /* Add head and tail for me please */
-
-  /* 1. connect & Change tail
-  2. (may be) change head  when the queue is empty
-*/
-  if(!headPtr) headPtr=new_node; //if no node
-   else tailPtr->set_next(new_node); //set next tail
-   tailPtr=new_node; //always change
-  
-  /*3. increase size*/
-	 size++;
-  cout<<"\nenquque order "<<x<<" quantity "<< y<<endl;
- }
-}
-
-int Queue::dequeue(){
-  if(headPtr!=NULL){
-     NodePtr t=headPtr;
-     int price= t->get_value();
-    //1. move head away --> to the next one****** 
-    headPtr=headPtr->get_next(); //t->get_next();
-    //2. Only for the last node -->change tail
-    if(size==1) /* headPtr==NULL or  !headPtr*/
-        tailPtr=NULL;
-     /* Add head and tail for me please */
-      size--;    
-     delete t;
-     return price;
-  }
-  cout<<"The queue is empty ";
-  return -1;
-}
-
-
-int main(int argc , char **argv) {
-  Queue Q;
-  int i,price;
-   /*
-./main 1 2 3 2 x 3 2 x
-*/
-  
-for(i=1;i<argc;i++){  
-  if(strcmp(argv[i],"x")==0){
-    price=Q.dequeue(); //  take out the price of the food
-    cout<<"\nYou have to pay "<< price <<endl;  
-    int cash;
-    do{
-      cout<<"Cash: ";
-      cin>>cash;
-     
-      }while(cash<price);
-      cout<<"Thank you \n";
-      cout<<"dequeing "<< price <<endl;  
+void insert_node(int x){
+  cout<<"inserting "<<x<<endl;
+  TreeNodePtr new_node = new TreeNode(x);//new_node = x
+  if(new_node){ //new node!=NULL
+    if(!rootPtr){ //root==NULL
+      rootPtr=new_node;
     }
-    else {
-      Q.enqueue(atoi(argv[i]),atoi(argv[i+1]));
-       //enqueue both order number an d number of portion
-      i++;
-      }
+    else{
+      int inserted=0; //successful=1
+      TreeNodePtr t = rootPtr; //create t = root
+      while(!inserted) {//loop insert==0
+        if(t->get_value()>=x){//x<=root
+          /* get to the left*/
+          if(t->move_left()==NULL){
+            t->set_left(new_node);
+            inserted=1;
+          } else t=t->move_left(); //move left != NULL
+          } //end if
+          else{
+            /* get to the right*/
+            if(t->move_right()==NULL){
+              t->set_right(new_node);
+              inserted=1;
+            } else t=t->move_right();
+            }//end else
+      }//end while
+      size++;
+      }//end else
+    }//end if
+  }
+
+void print_all(int option = 4){
+  switch(option){
+   case 0: inOrder(rootPtr); cout<<endl; break;
+   case 1: preOrder(rootPtr);cout<<endl;break;
+   case 2: postOrder(rootPtr);cout<<endl;break;
+   default: inOrder(rootPtr);cout<<endl;
+            preOrder(rootPtr);cout<<endl;
+            postOrder(rootPtr);cout<<endl;
+            treeOrder(rootPtr,0);cout<<endl;  
+    }
 }
-return 0;
+
+};//end BST
+
+void BST::inOrder(TreeNodePtr treePtr){ 
+  if(treePtr){
+  // if tree is not empty, then traverse
+  inOrder( treePtr->move_left() ); //Recursion to the left
+  cout<<setw(3)<<treePtr->get_value();  //print the value 
+   
+  inOrder( treePtr->move_right()); //Recursion to the right
+    } // end if                          
+} // end function inOrder
+
+void BST::preOrder(TreeNodePtr treePtr){ 
+  if(treePtr){
+    cout<<setw(3)<<treePtr->get_value();  //print the value 
+    preOrder(treePtr->move_left());
+    preOrder(treePtr->move_right());
+    } // end if                          
+} // end function preOrder
+
+void BST::postOrder(TreeNodePtr treePtr){ 
+  if(treePtr){
+    postOrder(treePtr->move_left());
+    postOrder(treePtr->move_right());
+    cout<<setw(3)<<treePtr->get_value();  //print the value 
+    } // end if                          
+} // end function postOrder
+
+void BST::treeOrder(TreeNodePtr treePtr,int x){
+  if(treePtr){
+    treeOrder(treePtr->move_right(),x+=1);
+    for(int i=0;i<x;i++) cout<<"    ";
+    cout<<treePtr->get_value()<<endl;  //print the value 
+    //for(int i=0;i<x;i++) cout<<"    ";
+    treeOrder(treePtr->move_left(),x);
+    } // end if      
+} // end function treeOrder
+
+void BST::clear_node(TreeNodePtr treePtr){
+  if(treePtr){
+    // if tree is not empty, then traverse
+    clear_node( treePtr->move_left() ); 
+    clear_node( treePtr->move_right());   
+    delete(treePtr);  //print the value 
+    } // end if           
 }
-/* 1. Change node --> order, quantity of order 
-   2. enqueue (each node has 2 values)
-  3. dequeue  
-       - confirm order
-       - calculate price
 
-4.      *** you can do in main** -take money & give change
-5.       destructor --> how many ppl left & clear the queue
-
- */
-
-
+/*
+./main 5 1 8 2 7 4 6
+*/
+int main(int argc,char *argv[]) {
+  BST b;
+  for(int i=1;i<(argc);i++){ //get input from argv
+    b.insert_node(atoi(argv[i]));
+    }
+  b.print_all();
+  /*
+   b.insert_node(5);
+   b.insert_node(1);
+   b.insert_node(8);
+   b.insert_node(2);
+   b.insert_node(7);
+   b.insert_node(4);
+   b.insert_node(6);
+   b.print_all();
+*/
+  }
